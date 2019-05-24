@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Hexasoft_FraudLabsProSmsVerification::fraudlabsprosmsverification" title="FraudLabsProSmsVerification" sortOrder="10">
+                    <resource id="Hexasoft_FraudLabsProSmsVerification::fraudlabsprosmsverification_fraudlabsprosmsverification" title="FraudLabsProSmsVerification" sortOrder="10"> 
+
+                    </resource>
+                    <resource id="Hexasoft_FraudLabsProSmsVerification::settings" title="Settings" sortOrder="20" />
+                </resource>
+            </resource>
+
+        </resources>
+    </acl>
+</config>

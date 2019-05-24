@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../Magento/Config/etc/system_file.xsd">
+    <system>
+        <tab id="fraudlabsprosmsverification" translate="label" sortOrder="20" >
+            <label>FraudLabs Pro SMS Verification</label>
+        </tab>
+        <section id="fraudlabsprosmsverification" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Settings</label>
+            <tab>fraudlabsprosmsverification</tab>
+            <resource>Hexasoft_FraudLabsProSmsVerification::hexasoft_fraudlabsprosmsverification</resource>
+            <group id="active_display" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>FraudLabs Pro SMS Verification</label>
+                <field id="active" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="api_key" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>API Key</label>
+                    <comment><![CDATA[You can register for a free license key at <a href="http://www.fraudlabspro.com/sign-up?r=magento" target="_blank">http://www.fraudlabspro.com/sign-up</a> if you do not have one.]]></comment>
+                </field>
+                <field id="sms_instruction" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS Instruction</label>
+                    <comment><![CDATA[This instruction will be displayed on the form to explain on what's need to be done for the SMS verification.]]></comment>
+                </field>
+                <field id="sms_template" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS Template</label>
+                    <comment><![CDATA[Template for SMS. Use <strong>{otp}</strong> for the generated OTP. The maximum length for SMS template must be <strong>less than 140 characters</strong>.]]></comment>
+                </field>
+                <field id="email_subject" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Email Subject</label>
+                    <comment><![CDATA[Subject or title of the mail.]]></comment>
+                </field>
+                <field id="email_body" translate="label" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Email Body</label>
+                    <comment><![CDATA[Content of the mail. The <strong>{email_verification_link}</strong> tag will be automatically replaced with the page URL for SMS verification, and must not be removed from the email body.]]></comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
