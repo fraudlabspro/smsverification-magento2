@@ -27,4 +27,4 @@ Sign up for a Free license key at https://www.fraudlabspro.com/sign-up. You will
 2.  Next continue by entering: composer update
 3.  Then follow by: php bin/magento setup:upgrade
 
-For more detail information please refer https://www.fraudlabspro.com/tutorials/how-to-install-fraudlabs-pro-sms-verification-plugin-on-magento2.
+For more detail information please refer https://www.fraudlabspro.com/resources/tutorials/how-to-install-fraudlabs-pro-sms-verification-plugin-on-magento-2/
