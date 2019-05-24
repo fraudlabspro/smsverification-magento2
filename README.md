@@ -1,5 +1,5 @@
 # FraudLabs Pro SMS Verification (Extension for Magento2)
-FraudLabs Pro SMS Verification is an extension that help merchants to authenticate the client’s identity by sending them a SMS for verification. It is designed to trigger during checkout to validate the client’s mobile phone number.
+FraudLabs Pro SMS Verification is an extension that help merchants to authenticate the client’s identity by sending them a SMS for verification.
 
 ## Easy to setup
 
