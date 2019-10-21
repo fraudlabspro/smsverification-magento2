@@ -45,7 +45,13 @@ class Observer implements ObserverInterface {
             $customerEmail = $order->getCustomerEmail();
 
             if ($order->getfraudlabspro_response()) {
-                $data = unserialize($order->getfraudlabspro_response());
+                if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+                    if($order->getfraudlabspro_response()){
+                        $data = $this->_unserialize($order->getfraudlabspro_response());
+                    }
+                } else {
+                     $data = json_decode($order->getfraudlabspro_response(), true);
+                }
                 if ($data['fraudlabspro_status'] == 'REVIEW') {
                     $subject = ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_subject', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/email_subject')) : 'Action Required: SMS Verification is required to process the order.';
 
@@ -81,7 +87,7 @@ class Observer implements ObserverInterface {
                         $data['fraudlabspro_sms_email_code'] = $code;
                         $data['fraudlabspro_sms_email_phone'] = '';
                         $data['fraudlabspro_sms_email_sms'] = '';
-                        $order->setfraudlabspro_response(serialize($data))->save();
+                        $order->setfraudlabspro_response(json_encode($data))->save();
                         return;
                     } catch (\Exception $e) {
                         $this->_logger->critical($e->getMessage());
@@ -103,6 +109,18 @@ class Observer implements ObserverInterface {
         $pattern = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         for($i=0; $i<$length; $i++) $key .= $pattern{rand(0, strlen($pattern)-1)};
         return $key;
+    }
+
+    private function _unserialize($data){
+        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
+            return $serializer->unserialize($data);
+        } else if (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
+            return $serializer->unserialize($data);
+        }
     }
 
 }

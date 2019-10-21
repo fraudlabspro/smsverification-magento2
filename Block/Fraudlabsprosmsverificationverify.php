@@ -10,10 +10,13 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
 
     public function methodBlock()
     {
-        $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : die('API Key cannot be empty.');
+        $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : 'API Key cannot be empty.';
+        if ($apiKey == 'Phone number cannot be empty.') return 'API Key cannot be empty.';
         $params['format'] = 'json';
-        $params['otp'] = (filter_input(INPUT_POST, 'otp')) ? (filter_input(INPUT_POST, 'otp')) : die('OTP cannot be empty.');
-        $params['tran_id'] = (filter_input(INPUT_POST, 'tran_id')) ? (filter_input(INPUT_POST, 'tran_id')) : die('Tran ID cannot be empty.');
+        $params['otp'] = (filter_input(INPUT_POST, 'otp')) ? (filter_input(INPUT_POST, 'otp')) : 'OTP cannot be empty.';
+        if ($params['otp'] == 'OTP cannot be empty.') return 'OTP cannot be empty.';
+        $params['tran_id'] = (filter_input(INPUT_POST, 'tran_id')) ? (filter_input(INPUT_POST, 'tran_id')) : 'Tran ID cannot be empty.';
+        if ($params['tran_id'] == 'Tran ID cannot be empty.') return 'Tran ID cannot be empty.';
         $url = 'https://api.fraudlabspro.com/v1/verification/result';
 
         $query = '';
@@ -36,16 +39,16 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
 
         // still having network issue after 3 retries, give up
         if (!$result)
-            die();
+            return;
 
         // Get the HTTP response
         $data = json_decode($result);
 
         if (trim($data->error) != '') {
-            die($data->error);
+            return $data->error;
         }
         else {
-            die('OK');
+            return 'FLPOK';
         }
     }
 

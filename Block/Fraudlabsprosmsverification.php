@@ -43,13 +43,19 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             if ( $sms_order_id != '' ) {
                 if ( !empty( $sms_code ) ) {
                     $order = $this->getOrder($sms_order_id);
-                    $flpdata = unserialize($order->getfraudlabspro_response());
+                    if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+                        if($order->getfraudlabspro_response()){
+                            $flpdata = $this->_unserialize($order->getfraudlabspro_response());
+                        }
+                    } else {
+                         $flpdata = json_decode($order->getfraudlabspro_response(), true);
+                    }
                     if ( ($flpdata['fraudlabspro_sms_email_code'] == $sms_code . '_VERIFIED') && ($phone != '') && ($flpdata['fraudlabspro_sms_email_sms'] == '') ) {
 
                         $flpdata['fraudlabspro_sms_email_phone'] = $phone;
                         $flpdata['fraudlabspro_sms_email_sms'] = 'VERIFIED';
                         $flpdata['is_phone_verified'] = $phone . ' verified';
-                        $order->setfraudlabspro_response(serialize($flpdata))->save();
+                        $order->setfraudlabspro_response(json_encode($flpdata))->save();
 
                         return '
                         <div>
@@ -134,19 +140,20 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     }
 
     function sms_doOTP_success(data) {
-        if (data.indexOf("OK") != 0) {
-            alert(data + "\nError: Unable to send the SMS verification message to " + jQuery("#phone_number").val() + ".");
-        }
-        else if (data.indexOf("OK") == 0) {
+        if (data.includes("FLPOK")) {
+            var num = data.search("FLPOK");
             alert("A verification SMS has been sent to " + jQuery("#phone_number").val() + ".");
-            jQuery("#sms_tran_id").val(data.substr(2,20));
+            jQuery("#sms_tran_id").val(data.substr(num+5, 20));
             jQuery("#get_otp").hide();
             jQuery("#resend_otp").show();
             jQuery("#submit_otp").show();
             jQuery("#enter_sms_otp").show();
-            jQuery("#sms_otp1").val(data.substr(22));
+            jQuery("#sms_otp1").val(data.substr(num+25, 6));
             jQuery("#phone_number").prop("disabled", true);
             jQuery("#sms_otp1").prop("disabled", true);
+        }
+        else {
+            alert("Error: Unable to send the SMS verification message to " + jQuery("#phone_number").val() + ".");
         }
     }
 
@@ -170,10 +177,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     }
 
     function sms_checkOTP_success(data) {
-        if (data.indexOf("OK") != 0) {
-            alert("Error: " + data );
-        }
-        else if (data.indexOf("OK") == 0) {
+        if (data.includes("FLPOK")) {
             jQuery("#sms_verified").val("YES");
             jQuery(".btn-checkout").prop("disabled",false);
             if(typeof(Storage) !== "undefined") {
@@ -189,6 +193,9 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             // redirect the page to get phone number
             var url = window.location.href + "&phone=" + jQuery("#phone_number").val();
             window.location.href = url;
+        }
+        else {
+            alert("Error while performing verification.");
         }
     }
 
@@ -257,6 +264,18 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 
         } else {
             return '';
+        }
+    }
+
+    private function _unserialize($data){
+        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
+            return $serializer->unserialize($data);
+        } else if (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
+            return $serializer->unserialize($data);
         }
     }
 

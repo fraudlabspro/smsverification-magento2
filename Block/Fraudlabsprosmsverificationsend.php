@@ -25,8 +25,10 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
 
     public function methodBlock()
     {
-        $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : die('API Key cannot be empty.');
-        $tel = (filter_input(INPUT_POST, 'tel')) ? (filter_input(INPUT_POST, 'tel')) : die('Phone number cannot be empty.');
+        $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : 'API Key cannot be empty.';
+        if ($apiKey == 'Phone number cannot be empty.') return 'API Key cannot be empty.';
+        $tel = (filter_input(INPUT_POST, 'tel')) ? (filter_input(INPUT_POST, 'tel')) : 'Phone number cannot be empty.';
+        if ($tel == 'Phone number cannot be empty.') return 'Phone number cannot be empty.';
         $sms_order_id = (filter_input(INPUT_POST, 'sms_order_id')) ? (filter_input(INPUT_POST, 'sms_order_id')) : '';
         $sms_code = (filter_input(INPUT_POST, 'sms_code')) ? (filter_input(INPUT_POST, 'sms_code')) : '';
         $params['format'] = 'json';
@@ -58,30 +60,48 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
 
         // still having network issue after 3 retries, give up
         if (!$result)
-            die();
+            return;
 
         // Get the HTTP response
         $data = json_decode($result);
 
         if (trim($data->error) != '') {
-            die($data->error);
+            return $data->error;
         }
         else {
             if ( $sms_order_id != "" ) {
                 if ( $sms_code != "" ) {
                     $order = $this->getOrder($sms_order_id);
                     if ($order->getfraudlabspro_response()) {
-                        $flpdata = unserialize($order->getfraudlabspro_response());
+                        if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+                            if($order->getfraudlabspro_response()){
+                                $flpdata = $this->_unserialize($order->getfraudlabspro_response());
+                            }
+                        } else {
+                             $flpdata = json_decode($order->getfraudlabspro_response(), true);
+                        }
                         if ( $flpdata['fraudlabspro_sms_email_code'] == $sms_code ) {
                             $flpdata['fraudlabspro_sms_email_code'] = $sms_code . '_VERIFIED';
-                            $order->setfraudlabspro_response(serialize($flpdata))->save();
+                            $order->setfraudlabspro_response(json_encode($flpdata))->save();
                         }
                     }
                 }
             }
-            die('OK' . $data->tran_id . $data->otp_char);
+            return 'FLPOK' . $data->tran_id . $data->otp_char;
         }
 
+    }
+
+    private function _unserialize($data){
+        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
+            return $serializer->unserialize($data);
+        } else if (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
+            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+            $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
+            return $serializer->unserialize($data);
+        }
     }
 
 }
