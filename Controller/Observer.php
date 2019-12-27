@@ -53,9 +53,9 @@ class Observer implements ObserverInterface {
                      $data = json_decode($order->getfraudlabspro_response(), true);
                 }
                 if ($data['fraudlabspro_status'] == 'REVIEW') {
-                    $subject = ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_subject', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/email_subject')) : 'Action Required: SMS Verification is required to process the order.';
+                    $subject = ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_subject', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) ? ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_subject')) : 'Action Required: SMS Verification is required to process the order.';
 
-                    $content = ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_body', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/email_body')) : "Dear Customer, Thanks for your business. Before we can continue processing your order, you may require you to click on the link to complete the SMS verification: {email_verification_link} Thank you.";
+                    $content = ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_body', \Magento\Store\Model\ScopeInterface::SCOPE_STORE)) ? ($this->scopeConfig->getValue('fraudlabsprosmsverification/active_display/email_body')) : "Dear Customer, Thanks for your business. Before we can continue processing your order, you may require you to click on the link to complete the SMS verification: {email_verification_link} Thank you.";
 
                     $code = $this->randomCode(20);
                     if (substr($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB), -1) == '/') {
