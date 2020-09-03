@@ -26,6 +26,7 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
     public function methodBlock()
     {
         $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : 'API Key cannot be empty.';
+        $otpTimeout = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/otp_timeout')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/otp_timeout') : 3600;
         if ($apiKey == 'Phone number cannot be empty.') return 'API Key cannot be empty.';
         $tel = (filter_input(INPUT_POST, 'tel')) ? (filter_input(INPUT_POST, 'tel')) : 'Phone number cannot be empty.';
         if ($tel == 'Phone number cannot be empty.') return 'Phone number cannot be empty.';
@@ -38,6 +39,7 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
             $params['tel'] = '+' . $params['tel'];
         $params['mesg'] = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_template')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_template') : 'Hi, your OTP for Magento is {otp}.';
         $params['mesg'] = str_replace(['{', '}'], ['<', '>'], $params['mesg']);
+        $params['otp_timeout'] = $otpTimeout;
         $url = 'https://api.fraudlabspro.com/v1/verification/send';
 
         $query = '';

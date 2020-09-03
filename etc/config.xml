@@ -8,6 +8,7 @@
                 <api_key></api_key>
                 <sms_instruction>You are required to verify your phone number using SMS verification. Please make sure you enter the complete phone number (including the country code) and click on the below button to request for an OTP (One Time Password) SMS.</sms_instruction>
                 <sms_template>Hi, your OTP for Magento is {otp}.</sms_template>
+                <otp_timeout>3600</otp_timeout>
                 <email_subject>Action Required: SMS Verification is required to process the order.</email_subject>
                 <email_body>Dear Customer, Thanks for your business. Before we can continue processing your order, you may require you to click on the link to complete the SMS verification: {email_verification_link} Thank you.</email_body>
             </general>

@@ -27,11 +27,15 @@
                     <label>SMS Template</label>
                     <comment><![CDATA[Template for SMS. Use <strong>{otp}</strong> for the generated OTP. The maximum length for SMS template must be <strong>less than 140 characters</strong>.]]></comment>
                 </field>
-                <field id="email_subject" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="otp_timeout" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS OTP Timeout</label>
+                    <comment><![CDATA[Timeout feature for OTP value in seconds. Default is 3600 seconds(1 hour). Max timeout is 86400 seconds(24 hours).]]></comment>
+                </field>
+                <field id="email_subject" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email Subject</label>
                     <comment><![CDATA[Subject or title of the mail.]]></comment>
                 </field>
-                <field id="email_body" translate="label" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="email_body" translate="label" type="textarea" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email Body</label>
                     <comment><![CDATA[Content of the mail. The <strong>{email_verification_link}</strong> tag will be automatically replaced with the page URL for SMS verification, and must not be removed from the email body.]]></comment>
                 </field>
