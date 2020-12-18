@@ -61,10 +61,25 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                         <div>
                             Your phone has been successfully verified. Thank you.
                         </div>';
+                    } elseif ( $flpdata['fraudlabspro_sms_email_sms'] == 'VERIFIED' ) {
+                        return '
+                        <div>
+                            Your phone has been successfully verified. Thank you.
+                        </div>';
                     } elseif ( $flpdata['fraudlabspro_sms_email_code'] == $sms_code ) {
                         return '
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-<script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/intlTelInput.min.js"></script>
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/css/intlTelInput.min.css">
+<script language="Javascript">
+  var phoneNum;
+  jQuery( document ).ready(function() {
+    phoneNum = window.intlTelInput(document.querySelector("#phone_number"), {
+        utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/utils.min.js",
+        separateDialCode: true
+    });
+  });
+
   jQuery(document).ready(function(){
     jQuery("#sms_otp2").bind("keypress", function(e) {
         var code = e.keyCode || e.which;
@@ -77,7 +92,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
         if (jQuery("#phone_number").val() == "") {
             alert("Please enter a valid phone number.");
             jQuery("#phone_number").focus();
-        }else if (!confirm("Send OTP to " + jQuery("#phone_number").val() + "?")) {
+        }else if (!confirm("Send OTP to " + phoneNum.getNumber() + "?")) {
             e.preventDefault();
         } else {
             doOTP();
@@ -96,7 +111,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                 alert("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
                 jQuery("#get_otp").hide();
                 jQuery("#resend_otp").hide();
-            } else if (!confirm("Send OTP to " + jQuery("#phone_number").val() + "?")) {
+            } else if (!confirm("Send OTP to " + phoneNum.getNumber() + "?")) {
                 e.preventDefault();
             } else {
                 doOTP();
@@ -125,7 +140,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 
     function doOTP() {
         var data = {
-            "tel": jQuery("#phone_number").val(),
+            "tel": phoneNum.getNumber(),
             "sms_order_id": jQuery("#sms_order_id").val(),
             "sms_code": jQuery("#sms_code").val()
         };
@@ -142,7 +157,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     function sms_doOTP_success(data) {
         if (data.includes("FLPOK")) {
             var num = data.search("FLPOK");
-            alert("A verification SMS has been sent to " + jQuery("#phone_number").val() + ".");
+            alert("A verification SMS has been sent to " + phoneNum.getNumber() + ".");
             jQuery("#sms_tran_id").val(data.substr(num+5, 20));
             jQuery("#get_otp").hide();
             jQuery("#resend_otp").show();
@@ -153,12 +168,12 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             jQuery("#sms_otp1").prop("disabled", true);
         }
         else {
-            alert("Error: Unable to send the SMS verification message to " + jQuery("#phone_number").val() + ".");
+            alert("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
         }
     }
 
     function sms_doOTP_error() {
-        alert("Error: Unable to send the SMS verification message to " + jQuery("#phone_number").val() + ".");
+        alert("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
     }
 
     function checkOTP() {
@@ -191,7 +206,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             jQuery("#sms_box").hide();
             jQuery("#sms_success_status").show();
             // redirect the page to get phone number
-            var url = window.location.href + "&phone=" + jQuery("#phone_number").val();
+            var url = window.location.href + "&phone=" + phoneNum.getNumber();
             window.location.href = url;
         }
         else {
@@ -225,7 +240,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
   </label>
   <br />
   <label for="sms_otp" id="enter_sms_otp" style="margin-bottom: 10px; display: none;">
-     OTP<br /><input type="text" name="sms_otp1" id="sms_otp1" value="" placeholder="Enter OTP characters" style="width:180px;">-<input type="text" name="sms_otp2" id="sms_otp2" value="" placeholder="Enter OTP numbers" style="width:180px;">
+     OTP<br /><input type="text" name="sms_otp1" id="sms_otp1" value="" placeholder="Enter OTP characters" style="width:180px;">-<input type="text" name="sms_otp2" id="sms_otp2" value="" placeholder="Enter OTP numbers" style="width:180px;"><br />
   </label>
   <br />
   <input type="button" class="action primary" name="submit_otp" id="submit_otp" value="Submit OTP" style="margin-right: 5px; padding: 5px 10px; display: none;">
