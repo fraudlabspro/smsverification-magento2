@@ -31,11 +31,15 @@
                     <label>SMS OTP Timeout</label>
                     <comment><![CDATA[Timeout feature for OTP value in seconds. Default is 3600 seconds(1 hour). Max timeout is 86400 seconds(24 hours).]]></comment>
                 </field>
-                <field id="email_subject" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sms_default_cc" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Country Code For SMS Sending</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                </field>
+                <field id="email_subject" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email Subject</label>
                     <comment><![CDATA[Subject or title of the mail.]]></comment>
                 </field>
-                <field id="email_body" translate="label" type="textarea" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="email_body" translate="label" type="textarea" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email Body</label>
                     <comment><![CDATA[Content of the mail. The <strong>{email_verification_link}</strong> tag will be automatically replaced with the page URL for SMS verification, and must not be removed from the email body.]]></comment>
                 </field>

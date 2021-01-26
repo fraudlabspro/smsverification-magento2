@@ -13,3 +13,6 @@ Revision History for FraudLabs Pro Magento 2
 
 1.1.1 2020-12-17
         Improve phone number entering.
+
+1.1.2 2021-01-26
+        Add default country code for SMS sending.

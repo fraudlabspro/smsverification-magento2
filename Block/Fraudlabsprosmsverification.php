@@ -27,6 +27,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     {
         if($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/active')){
             $smsInstruction = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) : 'You are required to verify your phone number using SMS verification. Please make sure you enter the complete phone number (including the country code) and click on the below button to request for an OTP (One Time Password) SMS.';
+            $smsDefaultCc = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) : 'US';
 
             if (substr($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB), -1) == '/') {
                 $siteUrl = substr($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB), 0, -1);
@@ -72,11 +73,17 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 <script src="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/intlTelInput.min.js"></script>
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/css/intlTelInput.min.css">
 <script language="Javascript">
-  var phoneNum;
+  var phoneNum, defaultCc;
   jQuery( document ).ready(function() {
+    if( jQuery("#sms_phone_cc").length ){
+            defaultCc = jQuery("#sms_phone_cc").val();
+        } else {
+            defaultCc = "US";
+    }
     phoneNum = window.intlTelInput(document.querySelector("#phone_number"), {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/utils.min.js",
-        separateDialCode: true
+        separateDialCode: true,
+        initialCountry: defaultCc
     });
   });
 
@@ -251,6 +258,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
   <input type="hidden" name="sms_ip_addr" id="sms_ip_addr" value="">
   <input type="hidden" name="sms_order_id" id="sms_order_id" value="' . $sms_order_id . '"></div>
   <input type="hidden" name="sms_code" id="sms_code" value="' . $sms_code . '">
+  <input type="hidden" name="sms_phone_cc" id="sms_phone_cc" value="' . $smsDefaultCc . '">
 </div>
 <div id="sms_success_status" class="page-width" style="text-align: center; border: 1px solid silver; padding: 10px; background-color: #22B14C; color: white; display: none;"><span>Your phone has been successfully verified.</span></div>
 <br /><br />';
