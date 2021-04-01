@@ -12,6 +12,8 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
     {
         $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : 'API Key cannot be empty.';
         if ($apiKey == 'Phone number cannot be empty.') return 'API Key cannot be empty.';
+        $sms_order_id = (filter_input(INPUT_POST, 'sms_order_id')) ? (filter_input(INPUT_POST, 'sms_order_id')) : '';
+        $sms_code = (filter_input(INPUT_POST, 'sms_code')) ? (filter_input(INPUT_POST, 'sms_code')) : '';
         $params['format'] = 'json';
         $params['otp'] = (filter_input(INPUT_POST, 'otp')) ? (filter_input(INPUT_POST, 'otp')) : 'OTP cannot be empty.';
         if ($params['otp'] == 'OTP cannot be empty.') return 'OTP cannot be empty.';
@@ -45,9 +47,31 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
         $data = json_decode($result);
 
         if (trim($data->error) != '') {
-            return $data->error;
-        }
-        else {
+            if ($data->error == 'Invalid OTP.') {
+                return 'ERROR 601-' . $data->error;
+            } else {
+                $this->write_debug_log('Error occurred during FraudLabs Pro SMS OTP Verify. ERROR: ' . $data->error);
+                return 'ERROR 600-' . $data->error;
+            }
+        } else {
+            if ( $sms_order_id != "" ) {
+                if ( $sms_code != "" ) {
+                    $order = $this->getOrder($sms_order_id);
+                    if ($order->getfraudlabspro_response()) {
+                        if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+                            if($order->getfraudlabspro_response()){
+                                $flpdata = $this->_unserialize($order->getfraudlabspro_response());
+                            }
+                        } else {
+                             $flpdata = json_decode($order->getfraudlabspro_response(), true);
+                        }
+                        if ( $flpdata['fraudlabspro_sms_email_code'] == $sms_code ) {
+                            $flpdata['fraudlabspro_sms_email_code'] = $sms_code . '_VERIFIED';
+                            $order->setfraudlabspro_response(json_encode($flpdata))->save();
+                        }
+                    }
+                }
+            }
             return 'FLPOK';
         }
     }

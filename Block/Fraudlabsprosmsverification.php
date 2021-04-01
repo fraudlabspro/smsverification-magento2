@@ -76,9 +76,9 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
   var phoneNum, defaultCc;
   jQuery( document ).ready(function() {
     if( jQuery("#sms_phone_cc").length ){
-            defaultCc = jQuery("#sms_phone_cc").val();
-        } else {
-            defaultCc = "US";
+        defaultCc = jQuery("#sms_phone_cc").val();
+    } else {
+        defaultCc = "US";
     }
     phoneNum = window.intlTelInput(document.querySelector("#phone_number"), {
         utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/utils.min.js",
@@ -97,9 +97,10 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 
     jQuery("#get_otp").click(function(e) {
         if (jQuery("#phone_number").val() == "") {
-            alert("Please enter a valid phone number.");
+            jQuery("#sms_err").html("Please enter a valid phone number.");
+            jQuery("#sms_err").show();
             jQuery("#phone_number").focus();
-        }else if (!confirm("Send OTP to " + phoneNum.getNumber() + "?")) {
+        } else if (!confirm("Send OTP to " + phoneNum.getNumber() + "?")) {
             e.preventDefault();
         } else {
             doOTP();
@@ -115,7 +116,8 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             }
 
             if(sessionStorage.resent_count == 3){
-                alert("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
+                jQuery("#sms_err").html("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
+                jQuery("#sms_err").show();
                 jQuery("#get_otp").hide();
                 jQuery("#resend_otp").hide();
             } else if (!confirm("Send OTP to " + phoneNum.getNumber() + "?")) {
@@ -131,7 +133,8 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     });
 
     if(sessionStorage.resent_count >= 3){
-        alert("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
+        jQuery("#sms_err").html("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
+        jQuery("#sms_err").show();
         jQuery("#get_otp").hide();
         jQuery("#resend_otp").hide();
     }
@@ -140,7 +143,6 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
         jQuery(".btn-checkout").prop("disabled",false);
     } else if (jQuery.trim(jQuery("#sms_verified").val()) == "") {
         jQuery(".btn-checkout").prop("disabled",true);
-        /* alert("Please complete the SMS Verification.");
         jQuery("#sms_otp2").focus();
         document.getElementById("verifysms").scrollIntoView(true);*/
     }
@@ -148,8 +150,8 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     function doOTP() {
         var data = {
             "tel": phoneNum.getNumber(),
-            "sms_order_id": jQuery("#sms_order_id").val(),
-            "sms_code": jQuery("#sms_code").val()
+            "tel_cc": phoneNum.getSelectedCountryData().iso2.toUpperCase(),
+            "sms_order_id": jQuery("#sms_order_id").val()
         };
         jQuery.ajax({
             type: "POST",
@@ -167,26 +169,30 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             alert("A verification SMS has been sent to " + phoneNum.getNumber() + ".");
             jQuery("#sms_tran_id").val(data.substr(num+5, 20));
             jQuery("#get_otp").hide();
+            jQuery("#sms_err").hide();
             jQuery("#resend_otp").show();
             jQuery("#submit_otp").show();
             jQuery("#enter_sms_otp").show();
             jQuery("#sms_otp1").val(data.substr(num+25, 6));
             jQuery("#phone_number").prop("disabled", true);
             jQuery("#sms_otp1").prop("disabled", true);
-        }
-        else {
-            alert("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
+        } else {
+            jQuery("#sms_err").html("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
+            jQuery("#sms_err").show();
         }
     }
 
     function sms_doOTP_error() {
-        alert("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
+        jQuery("#sms_err").html("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
+        jQuery("#sms_err").show();
     }
 
     function checkOTP() {
         var data = {
             "otp": jQuery("#sms_otp1").val() + "-" + jQuery("#sms_otp2").val(),
-            "tran_id": jQuery("#sms_tran_id").val()
+            "tran_id": jQuery("#sms_tran_id").val(),
+            "sms_order_id": jQuery("#sms_order_id").val(),
+            "sms_code": jQuery("#sms_code").val()
         };
         jQuery.ajax({
             type: "POST",
@@ -210,19 +216,24 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             jQuery("#submit_otp").hide();
             jQuery("#get_otp").hide();
             jQuery("#resend_otp").hide();
+            jQuery("#sms_err").hide();
             jQuery("#sms_box").hide();
             jQuery("#sms_success_status").show();
             // redirect the page to get phone number
             var url = window.location.href + "&phone=" + phoneNum.getNumber();
             window.location.href = url;
-        }
-        else {
-            alert("Error while performing verification.");
+        } else if (data.includes("ERROR 601")) {
+            jQuery("#sms_err").html("Error: Invalid OTP. Please enter the correct OTP.");
+            jQuery("#sms_err").show();
+        } else {
+            jQuery("#sms_err").html("Error: Error while performing verification.");
+            jQuery("#sms_err").show();
         }
     }
 
     function sms_checkOTP_error() {
-        alert("Error: Could not perform sms verification.");
+        jQuery("#sms_err").html("Error: Could not perform sms verification.");
+        jQuery("#sms_err").show();
     }
 
     if(sessionStorage.sms_vrf == "YES") {
@@ -241,6 +252,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 <br />
 <div id="sms_box" class="page-width" style="font-size: 14px; border: 1px solid silver; padding: 5px;">
   <h1 id="verifysms">SMS Verification<abbr class="required" title="required">*</abbr></h1>
+  <div id="sms_err" style="background-color:#f8d7da;color:#7d5880;padding:10px;margin-bottom:20px;font-size:1em;display:none;"></div>
   <label for="phone_number" id="enter_phone_number">
     ' . $smsInstruction . '    <br /><br />
     Phone Number with country code<br /><input type="text" class="page-width" name="phone_number" id="phone_number" value="" placeholder="Enter phone number.">

@@ -31,7 +31,21 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
         $tel = (filter_input(INPUT_POST, 'tel')) ? (filter_input(INPUT_POST, 'tel')) : 'Phone number cannot be empty.';
         if ($tel == 'Phone number cannot be empty.') return 'Phone number cannot be empty.';
         $sms_order_id = (filter_input(INPUT_POST, 'sms_order_id')) ? (filter_input(INPUT_POST, 'sms_order_id')) : '';
-        $sms_code = (filter_input(INPUT_POST, 'sms_code')) ? (filter_input(INPUT_POST, 'sms_code')) : '';
+        if ($sms_order_id != "") {
+            $order = $this->getOrder($sms_order_id);
+            if ($order->getfraudlabspro_response()) {
+                if (is_null(json_decode($order->getfraudlabspro_response(), true))){
+                    if ($order->getfraudlabspro_response()){
+                        $flpData = $this->_unserialize($order->getfraudlabspro_response());
+                    }
+                } else {
+                     $flpData = json_decode($order->getfraudlabspro_response(), true);
+                }
+                $flpId = $flpData['fraudlabspro_id'];
+            }
+        } else {
+            $flpId = '';
+        }
         $params['format'] = 'json';
         $params['source'] = 'magento';
         $params['tel'] = trim($tel);
@@ -39,6 +53,8 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
             $params['tel'] = '+' . $params['tel'];
         $params['mesg'] = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_template')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_template') : 'Hi, your OTP for Magento is {otp}.';
         $params['mesg'] = str_replace(['{', '}'], ['<', '>'], $params['mesg']);
+        $params['flp_id'] = $flpId;
+        $params['tel_cc'] = (filter_input(INPUT_POST, 'tel_cc')) ? (filter_input(INPUT_POST, 'tel_cc')) : '';
         $params['otp_timeout'] = $otpTimeout;
         $url = 'https://api.fraudlabspro.com/v1/verification/send';
 
@@ -69,26 +85,7 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
 
         if (trim($data->error) != '') {
             return $data->error;
-        }
-        else {
-            if ( $sms_order_id != "" ) {
-                if ( $sms_code != "" ) {
-                    $order = $this->getOrder($sms_order_id);
-                    if ($order->getfraudlabspro_response()) {
-                        if(is_null(json_decode($order->getfraudlabspro_response(), true))){
-                            if($order->getfraudlabspro_response()){
-                                $flpdata = $this->_unserialize($order->getfraudlabspro_response());
-                            }
-                        } else {
-                             $flpdata = json_decode($order->getfraudlabspro_response(), true);
-                        }
-                        if ( $flpdata['fraudlabspro_sms_email_code'] == $sms_code ) {
-                            $flpdata['fraudlabspro_sms_email_code'] = $sms_code . '_VERIFIED';
-                            $order->setfraudlabspro_response(json_encode($flpdata))->save();
-                        }
-                    }
-                }
-            }
+        } else {
             return 'FLPOK' . $data->tran_id . $data->otp_char;
         }
 
