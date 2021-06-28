@@ -68,6 +68,18 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                             Your phone has been successfully verified. Thank you.
                         </div>';
                     } elseif ( $flpdata['fraudlabspro_sms_email_code'] == $sms_code ) {
+						$msgOtpSuccess = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_otp_success')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_otp_success')) : 'A SMS containing the OTP (One Time Passcode) has been sent to {phone}. Please enter the 6 digits OTP value to complete the verification.';
+						if (strpos($msgOtpSuccess, '{phone}') === false) {
+							$msgOtpSuccess = 'A SMS containing the OTP (One Time Passcode) has been sent to {phone}. Please enter the 6 digits OTP value to complete the verification.';
+						}
+						$msgOtpSuccess = explode("{phone}", $msgOtpSuccess);
+						$msgOtpFail = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_otp_fail')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_otp_fail')) : 'Error: Unable to send the SMS verification message to {phone}.';
+						if (strpos($msgOtpFail, '{phone}') === false) {
+							$msgOtpFail = 'Error: Unable to send the SMS verification message to {phone}.';
+						}
+						$msgOtpFail = explode("{phone}", $msgOtpFail);
+						$msgInvalidPhone = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_phone')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_phone')) : 'Please enter a valid phone number.';
+						$msgInvalidOtp = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_otp')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_otp')) : 'Error: Invalid OTP. Please enter the correct OTP.';
                         return '
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/intlTelInput.min.js"></script>
@@ -97,7 +109,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 
     jQuery("#get_otp").click(function(e) {
         if (jQuery("#phone_number").val() == "") {
-            jQuery("#sms_err").html("Please enter a valid phone number.");
+            jQuery("#sms_err").html("' . $msgInvalidPhone . '");
             jQuery("#sms_err").show();
             jQuery("#phone_number").focus();
         } else if (!confirm("Send OTP to " + phoneNum.getNumber() + "?")) {
@@ -144,7 +156,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     } else if (jQuery.trim(jQuery("#sms_verified").val()) == "") {
         jQuery(".btn-checkout").prop("disabled",true);
         jQuery("#sms_otp2").focus();
-        document.getElementById("verifysms").scrollIntoView(true);*/
+        document.getElementById("verifysms").scrollIntoView(true);
     }
 
     function doOTP() {
@@ -166,7 +178,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     function sms_doOTP_success(data) {
         if (data.includes("FLPOK")) {
             var num = data.search("FLPOK");
-            alert("A verification SMS has been sent to " + phoneNum.getNumber() + ".");
+            alert("' . $msgOtpSuccess[0] . '" + phoneNum.getNumber() + "' . $msgOtpSuccess[1] . '");
             jQuery("#sms_tran_id").val(data.substr(num+5, 20));
             jQuery("#get_otp").hide();
             jQuery("#sms_err").hide();
@@ -177,13 +189,13 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             jQuery("#phone_number").prop("disabled", true);
             jQuery("#sms_otp1").prop("disabled", true);
         } else {
-            jQuery("#sms_err").html("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
+            jQuery("#sms_err").html("' . $msgOtpFail[0] . '" + phoneNum.getNumber() + "' . $msgOtpFail[1] . '");
             jQuery("#sms_err").show();
         }
     }
 
     function sms_doOTP_error() {
-        jQuery("#sms_err").html("Error: Unable to send the SMS verification message to " + phoneNum.getNumber() + ".");
+        jQuery("#sms_err").html("' . $msgOtpFail[0] . '" + phoneNum.getNumber() + "' . $msgOtpFail[1] . '");
         jQuery("#sms_err").show();
     }
 
@@ -223,7 +235,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             var url = window.location.href + "&phone=" + phoneNum.getNumber();
             window.location.href = url;
         } else if (data.includes("ERROR 601")) {
-            jQuery("#sms_err").html("Error: Invalid OTP. Please enter the correct OTP.");
+            jQuery("#sms_err").html("' . $msgInvalidOtp . '");
             jQuery("#sms_err").show();
         } else {
             jQuery("#sms_err").html("Error: Error while performing verification.");

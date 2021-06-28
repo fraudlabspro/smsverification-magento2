@@ -11,6 +11,10 @@
                 <otp_timeout>3600</otp_timeout>
                 <email_subject>Action Required: SMS Verification is required to process the order.</email_subject>
                 <email_body>Dear Customer, Thanks for your business. Before we can continue processing your order, you may require you to click on the link to complete the SMS verification: {email_verification_link} Thank you.</email_body>
+                <msg_otp_success>A SMS containing the OTP (One Time Passcode) has been sent to {phone}. Please enter the 6 digits OTP value to complete the verification.</msg_otp_success>
+                <msg_otp_fail>Error: Unable to send the SMS verification message to {phone}.</msg_otp_fail>
+                <msg_invalid_phone>Please enter a valid phone number.</msg_invalid_phone>
+                <msg_invalid_otp>Error: Invalid OTP. Please enter the correct OTP.</msg_invalid_otp>
             </general>
         </fraudlabsprosmsverification>
     </default>

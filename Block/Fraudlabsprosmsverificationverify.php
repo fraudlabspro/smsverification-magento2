@@ -3,9 +3,24 @@ namespace Hexasoft\FraudLabsProSmsVerification\Block;
 class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\Template
 {
 
+    protected $orderRepository ;
+    public function __construct(
+        \Magento\Framework\View\Element\Template\Context $context,
+        \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        array $data = []
+    ) {
+        $this->orderRepository = $orderRepository;
+        parent::__construct($context, $data);
+    }
+
     public function getConfig()
     {
         return $this->_scopeConfig;
+    }
+
+    public function getOrder($id)
+    {
+        return $this->orderRepository->get($id);
     }
 
     public function methodBlock()

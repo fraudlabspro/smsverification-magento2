@@ -43,6 +43,22 @@
                     <label>Email Body</label>
                     <comment><![CDATA[Content of the mail. The <strong>{email_verification_link}</strong> tag will be automatically replaced with the page URL for SMS verification, and must not be removed from the email body.]]></comment>
                 </field>
+                <field id="msg_otp_success" translate="label" type="textarea" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>OTP Sent Succesfully Message</label>
+                    <comment><![CDATA[Messages to show the user when the OTP is sent successfully to the phone number. You must include the {phone} tag which will be replaced by the user's phone number.]]></comment>
+                </field>
+                <field id="msg_otp_fail" translate="label" type="textarea" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>OTP Sent Failed Message</label>
+                    <comment><![CDATA[Messages to show the user when the OTP is sent failed to the phone number. You must include the {phone} tag which will be replaced by the user's phone number.]]></comment>
+                </field>
+                <field id="msg_invalid_phone" translate="label" type="textarea" sortOrder="11" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Invalid Phone Number Message</label>
+                    <comment><![CDATA[Messages to show the user when invalid phone number is entered.]]></comment>
+                </field>
+                <field id="msg_invalid_otp" translate="label" type="textarea" sortOrder="12" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Invalid OTP Message</label>
+                    <comment><![CDATA[Messages to show the user when invalid OTP is entered.]]></comment>
+                </field>
             </group>
         </section>
     </system>
