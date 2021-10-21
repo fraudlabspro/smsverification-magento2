@@ -15,6 +15,7 @@
                 <msg_otp_fail>Error: Unable to send the SMS verification message to {phone}.</msg_otp_fail>
                 <msg_invalid_phone>Please enter a valid phone number.</msg_invalid_phone>
                 <msg_invalid_otp>Error: Invalid OTP. Please enter the correct OTP.</msg_invalid_otp>
+                <msg_vrf_complete>Thank you. You have successfully completed the SMS verification.</msg_vrf_complete>
             </general>
         </fraudlabsprosmsverification>
     </default>

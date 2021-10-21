@@ -59,6 +59,10 @@
                     <label>Invalid OTP Message</label>
                     <comment><![CDATA[Messages to show the user when invalid OTP is entered.]]></comment>
                 </field>
+                <field id="msg_vrf_complete" translate="label" type="textarea" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS Verification Completed Message</label>
+                    <comment><![CDATA[Messages to show the user when SMS verification is completed.]]></comment>
+                </field>
             </group>
         </section>
     </system>
