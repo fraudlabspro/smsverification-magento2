@@ -25,7 +25,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 
     public function methodBlock()
     {
-        if($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/active')){
+        if ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/active')) {
             $smsInstruction = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) : 'You are required to verify your phone number using SMS verification. Please make sure you enter the complete phone number (including the country code) and click on the below button to request for an OTP (One Time Password) SMS.';
             $smsDefaultCc = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) : 'US';
 
@@ -35,7 +35,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                 $siteUrl = $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
             }
 
-            $sms_order_id = (filter_input(INPUT_GET, 'orderid')) ? (filter_input(INPUT_GET, 'orderid')) : '';
+            $sms_order_id = (filter_input(INPUT_GET, 'id')) ? (filter_input(INPUT_GET, 'id')) : '';
             $sms_code = (filter_input(INPUT_GET, 'code')) ? (filter_input(INPUT_GET, 'code')) : '';
             $phone = (filter_input(INPUT_GET, 'phone')) ? (filter_input(INPUT_GET, 'phone')) : '';
             $response = '';
@@ -43,9 +43,16 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
 
             if ( $sms_order_id != '' ) {
                 if ( !empty( $sms_code ) ) {
-                    $order = $this->getOrder($sms_order_id);
-                    if(is_null(json_decode($order->getfraudlabspro_response(), true))){
-                        if($order->getfraudlabspro_response()){
+                    try {
+                        $order = $this->getOrder($sms_order_id);
+                    } catch(\Exception $e) {
+                        return '
+                            <div>
+                                <span>Order not found. Verification failed.</span>
+                            </div>';
+                    }
+                    if ($order->getfraudlabspro_response() === null) {
+                        if ($order->getfraudlabspro_response()) {
                             $flpdata = $this->_unserialize($order->getfraudlabspro_response());
                         }
                     } else {
@@ -83,7 +90,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     <script language="Javascript">
       var phoneNum, defaultCc;
       jQuery( document ).ready(function() {
-        if( jQuery("#sms_phone_cc").length ){
+        if ( jQuery("#sms_phone_cc").length ) {
             defaultCc = jQuery("#sms_phone_cc").val();
         } else {
             defaultCc = "US";
@@ -116,14 +123,14 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
         });
 
         jQuery("#resend_otp").click(function() {
-            if(typeof(Storage) !== "undefined") {
+            if (typeof(Storage) !== "undefined") {
                 if (sessionStorage.resent_count) {
                     sessionStorage.resent_count = Number(sessionStorage.resent_count)+1;
                 } else {
                     sessionStorage.resent_count = 1;
                 }
 
-                if(sessionStorage.resent_count == 3){
+                if (sessionStorage.resent_count == 3) {
                     jQuery("#sms_err").html("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
                     jQuery("#sms_err").show();
                     jQuery("#get_otp").hide();
@@ -140,7 +147,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             checkOTP();
         });
 
-        if(sessionStorage.resent_count >= 3){
+        if (sessionStorage.resent_count >= 3) {
             jQuery("#sms_err").html("Maximum number of retries to send verification SMS exceeded. Please wait for your OTP code.");
             jQuery("#sms_err").show();
             jQuery("#get_otp").hide();
@@ -216,7 +223,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             if (data.includes("FLPOK")) {
                 jQuery("#sms_verified").val("YES");
                 jQuery(".btn-checkout").prop("disabled",false);
-                if(typeof(Storage) !== "undefined") {
+                if (typeof(Storage) !== "undefined") {
                     sessionStorage.sms_vrf = "YES";
                     sessionStorage.resent_count = 0;
                 }
@@ -244,7 +251,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             jQuery("#sms_err").show();
         }
 
-        if(sessionStorage.sms_vrf == "YES") {
+        if (sessionStorage.sms_vrf == "YES") {
             jQuery("#sms_verified").val("YES");
             jQuery(".btn-checkout").prop("disabled",false);
             jQuery("#enter_sms_otp").hide();
@@ -318,7 +325,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
             return $serializer->unserialize($data);
-        } else if (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
+        } elseif (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
             return $serializer->unserialize($data);

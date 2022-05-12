@@ -1,4 +1,4 @@
-Revision History for FraudLabs Pro Magento 2
+Revision History for FraudLabs Pro SMS Verification Magento 2
 1.0.0 2019-05-24
         First release.
 
@@ -25,3 +25,6 @@ Revision History for FraudLabs Pro Magento 2
 
 1.2.1 2021-10-20
         Add new common messages customization.
+
+1.2.2 2022-05-12
+        Fix compatibility issue with latest Magento.

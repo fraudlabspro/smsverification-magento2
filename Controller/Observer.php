@@ -45,7 +45,7 @@ class Observer implements ObserverInterface {
             $customerEmail = $order->getCustomerEmail();
 
             if ($order->getfraudlabspro_response()) {
-                if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+                if ($order->getfraudlabspro_response() === null) {
                     if($order->getfraudlabspro_response()){
                         $data = $this->_unserialize($order->getfraudlabspro_response());
                     }
@@ -63,7 +63,7 @@ class Observer implements ObserverInterface {
                     } else {
                         $siteUrl = $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
                     }
-                    $link = $siteUrl . '/fraudlabsprosmsverification?orderid=' . $orderId . '&code=' . $code;
+                    $link = $siteUrl . '/fraudlabsprosmsverification?id=' . $orderId . '&code=' . $code;
                     if ( strpos( $content, '{email_verification_link}' ) !== false ) {
                         $content = str_replace( '{email_verification_link}', $link, $content );
                     }
@@ -118,7 +118,7 @@ class Observer implements ObserverInterface {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
             return $serializer->unserialize($data);
-        } else if (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
+        } elseif (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
             return $serializer->unserialize($data);

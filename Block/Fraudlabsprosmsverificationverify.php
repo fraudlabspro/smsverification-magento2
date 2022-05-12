@@ -73,7 +73,7 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
                 if ( $sms_code != "" ) {
                     $order = $this->getOrder($sms_order_id);
                     if ($order->getfraudlabspro_response()) {
-                        if(is_null(json_decode($order->getfraudlabspro_response(), true))){
+                        if ($order->getfraudlabspro_response() === null) {
                             if($order->getfraudlabspro_response()){
                                 $flpdata = $this->_unserialize($order->getfraudlabspro_response());
                             }

@@ -34,7 +34,7 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
         if ($sms_order_id != "") {
             $order = $this->getOrder($sms_order_id);
             if ($order->getfraudlabspro_response()) {
-                if (is_null(json_decode($order->getfraudlabspro_response(), true))){
+                if ($order->getfraudlabspro_response() === null) {
                     if ($order->getfraudlabspro_response()){
                         $flpData = $this->_unserialize($order->getfraudlabspro_response());
                     }
@@ -96,7 +96,7 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
             return $serializer->unserialize($data);
-        } else if (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
+        } elseif (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
             return $serializer->unserialize($data);
