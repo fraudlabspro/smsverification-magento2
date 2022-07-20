@@ -34,6 +34,7 @@
                 <field id="sms_default_cc" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Default Country Code For SMS Sending</label>
                     <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <comment><![CDATA[Please visit <a href="https://www.fraudlabspro.com/developer/reference/country-codes-sms" target="_blank">https://www.fraudlabspro.com/developer/reference/country-codes-sms</a> to learn more about the supported countries.]]></comment>
                 </field>
                 <field id="email_subject" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email Subject</label>
