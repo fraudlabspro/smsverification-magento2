@@ -17,7 +17,7 @@
                 </field>
                 <field id="api_key" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>API Key</label>
-                    <comment><![CDATA[You can register for a free license key at <a href="http://www.fraudlabspro.com/sign-up?r=magento" target="_blank">http://www.fraudlabspro.com/sign-up</a> if you do not have one.]]></comment>
+                    <comment><![CDATA[You can register for a free license key at <a href="https://www.fraudlabspro.com/sign-up?r=magento" target="_blank">https://www.fraudlabspro.com/sign-up</a> if you do not have one.]]></comment>
                 </field>
                 <field id="sms_instruction" translate="label" type="textarea" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SMS Instruction</label>
