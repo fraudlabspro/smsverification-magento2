@@ -34,7 +34,7 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
         if ($params['otp'] == 'OTP cannot be empty.') return 'OTP cannot be empty.';
         $params['tran_id'] = (filter_input(INPUT_POST, 'tran_id')) ? (filter_input(INPUT_POST, 'tran_id')) : 'Tran ID cannot be empty.';
         if ($params['tran_id'] == 'Tran ID cannot be empty.') return 'Tran ID cannot be empty.';
-        $url = 'https://api.fraudlabspro.com/v1/verification/result';
+        $url = 'https://api.fraudlabspro.com/v2/verification/result';
 
         $query = '';
 
@@ -61,12 +61,12 @@ class Fraudlabsprosmsverificationverify extends \Magento\Framework\View\Element\
         // Get the HTTP response
         $data = json_decode($result);
 
-        if (trim($data->error) != '') {
-            if ($data->error == 'Invalid OTP.') {
-                return 'ERROR 601-' . $data->error;
+        if (isset($data->error->error_message)) {
+            if ($data->error->error_message == 'INVALID OTP') {
+                return 'ERROR 601-' . $data->error->error_message;
             } else {
-                $this->write_debug_log('Error occurred during FraudLabs Pro SMS OTP Verify. ERROR: ' . $data->error);
-                return 'ERROR 600-' . $data->error;
+                $this->write_debug_log('Error occurred during FraudLabs Pro SMS OTP Verify. ERROR: ' . $data->error->error_messag);
+                return 'ERROR 600-' . $data->error->error_message;
             }
         } else {
             if ( $sms_order_id != "" ) {

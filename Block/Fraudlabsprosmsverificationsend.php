@@ -48,6 +48,7 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
         }
         $params['format'] = 'json';
         $params['source'] = 'magento';
+        $params['key'] = $apiKey;
         $params['tel'] = trim($tel);
         if (strpos($params['tel'], '+') !== 0)
             $params['tel'] = '+' . $params['tel'];
@@ -56,42 +57,52 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
         $params['flp_id'] = $flpId;
         $params['tel_cc'] = (filter_input(INPUT_POST, 'tel_cc')) ? (filter_input(INPUT_POST, 'tel_cc')) : '';
         $params['otp_timeout'] = $otpTimeout;
-        $url = 'https://api.fraudlabspro.com/v1/verification/send';
 
-        $query = '';
+        $request = $this->post('https://api.fraudlabspro.com/v2/verification/send', $params);
 
-        foreach($params as $key=>$value) {
-            $query .= '&' . $key . '=' . rawurlencode($value);
-        }
+        if ($request) {
+            $data = json_decode($request);
 
-        $url = $url . '?key=' . $apiKey . $query;
-
-        $result = file_get_contents($url);
-
-        // network error, wait 2 seconds for next retry
-        if (!$result) {
-            for ($i = 0; $i < 3; ++$i) {
-                sleep(2);
-                $result = file_get_contents($url);
+            if (isset($data->error->error_message)) {
+                return $data->error->error_message;
+            } else {
+                return 'FLPOK' . $data->tran_id . $data->otp_char;
             }
-        }
-
-        // still having network issue after 3 retries, give up
-        if (!$result)
-            return;
-
-        // Get the HTTP response
-        $data = json_decode($result);
-
-        if (trim($data->error) != '') {
-            return $data->error;
         } else {
-            return 'FLPOK' . $data->tran_id . $data->otp_char;
+            // Network error
+            return;
         }
-
     }
 
-    private function _unserialize($data){
+    private function post($url, $fields = '')
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_ENCODING, 'gzip, deflate');
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, '1.1');
+        curl_setopt($ch, CURLOPT_AUTOREFERER, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+
+        if (!empty($fields)) {
+            curl_setopt($ch, CURLOPT_POST, 1);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, (is_array($fields)) ? http_build_query($fields) : $fields);
+        }
+
+        $response = curl_exec($ch);
+
+        if (!curl_errno($ch)) {
+            return $response;
+        }
+
+        return false;
+    }
+
+    private function _unserialize($data)
+    {
         if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
             $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
             $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
