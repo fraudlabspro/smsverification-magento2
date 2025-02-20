@@ -1,7 +1,10 @@
 Revision History for FraudLabs Pro SMS Verification Magento 2
 
+1.4.0 2024-12-16
+        Supported Adobe Commerce (cloud).
+
 1.3.0 2023-12-27
-        Update to FraudLabs Pro SMS Verification API v2..
+        Update to FraudLabs Pro SMS Verification API v2.
 
 1.2.3 2023-06-12
         Update FraudLabs Pro SMS Verification settings page.
