@@ -1,7 +1,7 @@
 {
     "name": "hexasoft/module-fraudlabsprosmsverification",
     "description": "FraudLabs Pro SMS Verification extension for Magento 2 that help merchants to authenticate the client's identity by sending them a SMS for verification.",
-    "version": "1.4.0",
+    "version": "1.4.1",
     "type": "magento2-module",
     "require": {
         "php": ">=5.5"

@@ -1,15 +1,26 @@
 <?php
 namespace Hexasoft\FraudLabsProSmsVerification\Block;
+
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\Escaper;
+
 class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Template
 {
 
     protected $orderRepository ;
+    protected $customerSession;
+    protected $escaper;
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        CustomerSession $customerSession,
+        Escaper $escaper,
         array $data = []
     ) {
         $this->orderRepository = $orderRepository;
+        $this->customerSession = $customerSession;
+        $this->escaper = $escaper;
         parent::__construct($context, $data);
     }
 
@@ -26,18 +37,17 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     public function methodBlock()
     {
         if ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/active')) {
-            $smsInstruction = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) : 'You are required to verify your phone number using SMS verification. Please make sure you enter the complete phone number (including the country code) and click on the below button to request for an OTP (One Time Password) SMS.';
-            $smsDefaultCc = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) : 'US';
+            $smsInstruction = $this->escaper->escapeHtml(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) : 'You are required to verify your phone number using SMS verification. Please make sure you enter the complete phone number (including the country code) and click on the below button to request for an OTP (One Time Password) SMS.');
+            $smsDefaultCc = $this->escaper->escapeHtml(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) : 'US');
 
-            if (substr($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB), -1) == '/') {
-                $siteUrl = substr($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB), 0, -1);
-            } else {
-                $siteUrl = $this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+            $siteUrl = $this->escaper->escapeUrl($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB));
+            if (substr($siteUrl, -1) == '/') {
+                $siteUrl = substr($siteUrl, 0, -1);
             }
 
-            $sms_order_id = (filter_input(INPUT_GET, 'id')) ? (filter_input(INPUT_GET, 'id')) : '';
-            $sms_code = (filter_input(INPUT_GET, 'code')) ? (filter_input(INPUT_GET, 'code')) : '';
-            $phone = (filter_input(INPUT_GET, 'phone')) ? (filter_input(INPUT_GET, 'phone')) : '';
+            $sms_order_id = $this->escaper->escapeHtml((filter_input(INPUT_GET, 'id')) ? (filter_input(INPUT_GET, 'id')) : '');
+            $sms_code = $this->escaper->escapeHtml((filter_input(INPUT_GET, 'code')) ? (filter_input(INPUT_GET, 'code')) : '');
+            $phone = $this->escaper->escapeHtml((filter_input(INPUT_GET, 'phone')) ? (filter_input(INPUT_GET, 'phone')) : '');
             $response = '';
             $errors = [];
 
@@ -46,20 +56,18 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                     try {
                         $order = $this->getOrder($sms_order_id);
                     } catch(\Exception $e) {
-                        return '
-                            <div>
-                                <span>Order not found. Verification failed.</span>
-                            </div>';
+                        return '<div><span>' . $this->escaper->escapeHtml('Order not found. Verification failed.') . '</span></div>';
                     }
-                    if ($order->getfraudlabspro_response() === null) {
-                        if ($order->getfraudlabspro_response()) {
-                            $flpdata = $this->_unserialize($order->getfraudlabspro_response());
-                        }
-                    } else {
-                         $flpdata = json_decode($order->getfraudlabspro_response(), true);
+                    $loggedInCustomerId = $this->customerSession->getCustomerId();
+                    if ($order->getCustomerId() && $order->getCustomerId() != $loggedInCustomerId) {
+                        return '<div><span>' . $this->escaper->escapeHtml('Access Denied. Authorization failed.') . '</span></div>';
+                    }
+                    $flpdata = [];
+                    if ($order->getfraudlabspro_response() !== null) {
+                        $flpdata = json_decode($order->getfraudlabspro_response(), true);
                     }
                     if ( !empty( $flpdata['fraudlabspro_sms_email_code'] ) ) {
-                        $msgVrfComplete = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_vrf_complete')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_vrf_complete')) : 'Thank you. You have successfully completed the SMS verification.';
+                        $msgVrfComplete = $this->escaper->escapeHtml(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_vrf_complete')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_vrf_complete')) : 'Thank you. You have successfully completed the SMS verification.');
                         if ( ($flpdata['fraudlabspro_sms_email_code'] == $sms_code . '_VERIFIED') && ($phone != '') && ($flpdata['fraudlabspro_sms_email_sms'] == '') ) {
 
                             $flpdata['fraudlabspro_sms_email_phone'] = $phone;
@@ -81,8 +89,8 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                                 $msgOtpFail = 'Error: Unable to send the SMS verification message to {phone}.';
                             }
                             $msgOtpFail = explode("{phone}", $msgOtpFail);
-                            $msgInvalidPhone = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_phone')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_phone')) : 'Please enter a valid phone number.';
-                            $msgInvalidOtp = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_otp')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_otp')) : 'Error: Invalid OTP. Please enter the correct OTP.';
+                            $msgInvalidPhone = $this->escaper->escapeJs(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_phone')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_phone')) : 'Please enter a valid phone number.');
+                            $msgInvalidOtp = $this->escaper->escapeJs(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_otp')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_invalid_otp')) : 'Error: Invalid OTP. Please enter the correct OTP.');
                             return '
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.5/js/intlTelInput.min.js"></script>
@@ -303,32 +311,17 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                     foreach ($errors as $error) {
                         $response .= '
                         <div>
-                            <span>' . $error . '</span>
+                            <span>' . $this->escaper->escapeHtml($error) . '</span>
                         </div>';
                     }
                     return $response;
                 }
             } else {
-                return '
-                    <div>
-                        <span>Input data cannot be empty. Verification failed.</span>
-                    </div>';
+                return '<div><span>' . $this->escaper->escapeHtml('Input data cannot be empty. Verification failed.') . '</span></div>';
             }
 
         } else {
             return '';
-        }
-    }
-
-    private function _unserialize($data){
-        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
-            return $serializer->unserialize($data);
-        } elseif (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
-            return $serializer->unserialize($data);
         }
     }
 

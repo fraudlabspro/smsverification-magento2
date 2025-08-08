@@ -1,15 +1,26 @@
 <?php
 namespace Hexasoft\FraudLabsProSmsVerification\Block;
+
+use Magento\Customer\Model\Session as CustomerSession;
+use Magento\Framework\Escaper;
+
 class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Template
 {
 
     protected $orderRepository ;
+    protected $customerSession;
+    protected $escaper;
+
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Sales\Api\OrderRepositoryInterface $orderRepository,
+        CustomerSession $customerSession,
+        Escaper $escaper,
         array $data = []
     ) {
         $this->orderRepository = $orderRepository;
+        $this->customerSession = $customerSession;
+        $this->escaper = $escaper;
         parent::__construct($context, $data);
     }
 
@@ -27,24 +38,27 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
     {
         $apiKey = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/api_key') : 'API Key cannot be empty.';
         $otpTimeout = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/otp_timeout')) ? $this->getConfig()->getValue('fraudlabsprosmsverification/active_display/otp_timeout') : 3600;
-        if ($apiKey == 'Phone number cannot be empty.') return 'API Key cannot be empty.';
+        if ($apiKey == 'Phone number cannot be empty.') {
+            return $this->escaper->escapeHtml('API Key cannot be empty.');
+        }
         $tel = (filter_input(INPUT_POST, 'tel')) ? (filter_input(INPUT_POST, 'tel')) : 'Phone number cannot be empty.';
-        if ($tel == 'Phone number cannot be empty.') return 'Phone number cannot be empty.';
+        if ($tel == 'Phone number cannot be empty.') {
+            return $this->escaper->escapeHtml('Phone number cannot be empty.');
+        }
         $sms_order_id = (filter_input(INPUT_POST, 'sms_order_id')) ? (filter_input(INPUT_POST, 'sms_order_id')) : '';
+        $flpId = '';
         if ($sms_order_id != "") {
             $order = $this->getOrder($sms_order_id);
-            if ($order->getfraudlabspro_response()) {
-                if ($order->getfraudlabspro_response() === null) {
-                    if ($order->getfraudlabspro_response()){
-                        $flpData = $this->_unserialize($order->getfraudlabspro_response());
-                    }
-                } else {
-                     $flpData = json_decode($order->getfraudlabspro_response(), true);
-                }
-                $flpId = $flpData['fraudlabspro_id'];
+            $loggedInCustomerId = $this->customerSession->getCustomerId();
+            if ($order->getCustomerId() && $order->getCustomerId() != $loggedInCustomerId) {
+                return $this->escaper->escapeHtml('ERROR Authorization failed.');
             }
-        } else {
-            $flpId = '';
+            if ($order->getfraudlabspro_response()) {
+                if ($order->getfraudlabspro_response() !== null) {
+                    $flpData = json_decode($order->getfraudlabspro_response(), true);
+                    $flpId = $flpData['fraudlabspro_id'];
+                }
+            }
         }
         $params['format'] = 'json';
         $params['source'] = 'magento';
@@ -64,9 +78,9 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
             $data = json_decode($request);
 
             if (isset($data->error->error_message)) {
-                return $data->error->error_message;
+                return $this->escaper->escapeHtml($data->error->error_message);
             } else {
-                return 'FLPOK' . $data->tran_id . $data->otp_char;
+                return $this->escaper->escapeHtml('FLPOK' . $data->tran_id . $data->otp_char);
             }
         } else {
             // Network error
@@ -99,19 +113,6 @@ class Fraudlabsprosmsverificationsend extends \Magento\Framework\View\Element\Te
         }
 
         return false;
-    }
-
-    private function _unserialize($data)
-    {
-        if (class_exists(\Magento\Framework\Serialize\SerializerInterface::class)) {
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $serializer = $objectManager->create(\Magento\Framework\Serialize\SerializerInterface::class);
-            return $serializer->unserialize($data);
-        } elseif (class_exists(\Magento\Framework\Unserialize\Unserialize::class)) {
-            $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-            $serializer = $objectManager->create(\Magento\Framework\Unserialize\Unserialize::class);
-            return $serializer->unserialize($data);
-        }
     }
 
 }
