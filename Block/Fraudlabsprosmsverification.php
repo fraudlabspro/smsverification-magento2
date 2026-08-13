@@ -38,7 +38,7 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
     {
         if ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/active')) {
             $smsInstruction = $this->escaper->escapeHtml(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_instruction')) : 'You are required to verify your phone number using SMS verification. Please make sure you enter the complete phone number (including the country code) and click on the below button to request for an OTP (One Time Password) SMS.');
-            $smsDefaultCc = $this->escaper->escapeHtml(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) : 'US');
+            $smsDefaultCc = $this->escaper->escapeHtml(($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/sms_default_cc')) : '');
 
             $siteUrl = $this->escaper->escapeUrl($this->_storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB));
             if (substr($siteUrl, -1) == '/') {
@@ -79,6 +79,11 @@ class Fraudlabsprosmsverification extends \Magento\Framework\View\Element\Templa
                         } elseif ( $flpdata['fraudlabspro_sms_email_sms'] == 'VERIFIED' ) {
                             return '<div>' . $msgVrfComplete . '</div>';
                         } elseif ( $flpdata['fraudlabspro_sms_email_code'] == $sms_code ) {
+                            if (empty($smsDefaultCc)) {
+                                if ($order->getBillingAddress()) {
+                                    $smsDefaultCc = $order->getBillingAddress()->getCountryId();
+                                }
+                            }
                             $msgOtpSuccess = ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_otp_success')) ? ($this->getConfig()->getValue('fraudlabsprosmsverification/active_display/msg_otp_success')) : 'A SMS containing the OTP (One Time Passcode) has been sent to {phone}. Please enter the 6 digits OTP value to complete the verification.';
                             if (strpos($msgOtpSuccess, '{phone}') === false) {
                                 $msgOtpSuccess = 'A SMS containing the OTP (One Time Passcode) has been sent to {phone}. Please enter the 6 digits OTP value to complete the verification.';

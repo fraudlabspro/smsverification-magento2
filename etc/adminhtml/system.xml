@@ -29,7 +29,7 @@
                 </field>
                 <field id="otp_timeout" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SMS OTP Timeout</label>
-                    <comment><![CDATA[Timeout feature for OTP value in seconds. Default is 3600 seconds(1 hour). Max timeout is 86400 seconds(24 hours).]]></comment>
+                    <comment><![CDATA[Timeout feature for OTP value in seconds. Default is 3600 seconds(1 hour). Max timeout is 86400 seconds (24 hours).]]></comment>
                 </field>
                 <field id="sms_default_cc" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Default Country Code For SMS Sending</label>
@@ -63,6 +63,10 @@
                 <field id="msg_vrf_complete" translate="label" type="textarea" sortOrder="13" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>SMS Verification Completed Message</label>
                     <comment><![CDATA[Messages to show the user when SMS verification is completed.]]></comment>
+                </field>
+                <field id="sms_usage_info" translate="label" type="note" sortOrder="14" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>SMS Usage</label>
+                    <comment><![CDATA[Please visit <a href="https://www.fraudlabspro.com/merchant/sms-verification-api" target="_blank">https://www.fraudlabspro.com/merchant/sms-verification-api</a> to view the SMS usage details.]]></comment>
                 </field>
             </group>
         </section>
